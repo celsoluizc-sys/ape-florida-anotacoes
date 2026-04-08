@@ -8,638 +8,133 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg:        #F4F1ED;
-      --surface:   #FFFFFF;
-      --border:    #E5E0D8;
-      --text:      #1C1917;
-      --text-muted:#8C8070;
-      --accent:    #A0734A;
-      --accent-lt: #F5EDE4;
-      --accent-hover: #8A5C38;
-      --pin:       #A0734A;
-      --pin-hl:    #D4956A;
-      --danger:    #C0392B;
-      --topbar-h:  56px;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      overflow: hidden;
-      height: 100vh;
-      color: var(--text);
-    }
-
-    /* ── Top bar ── */
-    #topbar {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: var(--topbar-h);
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      padding: 0 24px;
-      gap: 20px;
-      z-index: 200;
-    }
-
-    #topbar-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex: 1;
-    }
-    #topbar-logo .logo-mark {
-      width: 30px; height: 30px;
-      background: var(--accent);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: -0.5px;
-      flex-shrink: 0;
-    }
-    #topbar-logo h1 {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text);
-      letter-spacing: -.2px;
-    }
-    #topbar-logo span {
-      font-size: 12px;
-      color: var(--text-muted);
-      font-weight: 400;
-    }
-
-    .layout-switcher {
-      display: flex;
-      gap: 4px;
-      background: var(--bg);
-      padding: 4px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-    }
-    .layout-btn {
-      padding: 5px 16px;
-      border: none;
-      border-radius: 7px;
-      background: transparent;
-      color: var(--text-muted);
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all .18s;
-      font-family: 'Inter', sans-serif;
-    }
-    .layout-btn.active {
-      background: var(--surface);
-      color: var(--text);
-      box-shadow: 0 1px 4px rgba(0,0,0,.08);
-    }
-    .layout-btn:not(.active):hover { color: var(--text); }
-
-    #export-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 16px;
-      background: var(--accent-lt);
-      border: 1px solid #D4B8A0;
-      border-radius: 8px;
-      color: var(--accent);
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all .18s;
-      font-family: 'Inter', sans-serif;
-    }
-    #export-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
-
-    /* ── Zoom controls ── */
-    #zoom-controls {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      background: var(--bg);
-      padding: 4px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-    }
-    .zoom-btn {
-      width: 28px; height: 28px;
-      border: none;
-      border-radius: 7px;
-      background: transparent;
-      color: var(--text-muted);
-      font-size: 16px;
-      line-height: 1;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all .15s;
-      font-family: 'Inter', sans-serif;
-    }
-    .zoom-btn:hover { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
-    .zoom-btn:active { transform: scale(.93); }
-    #zoom-level {
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--text-muted);
-      min-width: 36px;
-      text-align: center;
-      font-family: 'Inter', sans-serif;
-    }
-
-    /* ── App shell ── */
-    #app {
-      display: flex;
-      height: 100vh;
-      padding-top: var(--topbar-h);
-    }
-
-    /* ── Floor plan ── */
-    #floor-plan-area {
-      flex: 1;
-      overflow: auto;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 32px;
-      background: var(--bg);
-    }
-
-    #floor-plan-container {
-      position: relative;
-      display: inline-block;
-      cursor: crosshair;
-      border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.06);
-      flex-shrink: 0;
-      overflow: hidden;
-      transform-origin: top center;
-      transition: transform .22s cubic-bezier(.4,0,.2,1);
-    }
-
-    #floor-plan-img {
-      display: block;
-      width: 100%;
-      user-select: none;
-    }
-
-    /* ── Cursor hint ── */
-    #cursor-hint {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(28,25,23,.75);
-      backdrop-filter: blur(8px);
-      color: white;
-      font-size: 12px;
-      padding: 8px 18px;
-      border-radius: 20px;
-      pointer-events: none;
-      transition: opacity .4s;
-      z-index: 50;
-    }
-    #cursor-hint.hidden { opacity: 0; }
-
-    /* ── Pins ── */
-    .pin {
-      position: absolute;
-      width: 28px; height: 28px;
-      background: var(--pin);
-      border: 2px solid white;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 600;
-      font-size: 11px;
-      font-family: 'Inter', sans-serif;
-      transform: translate(-50%, -50%);
-      cursor: pointer;
-      box-shadow: 0 2px 10px rgba(0,0,0,.25);
-      z-index: 20;
-      transition: transform .15s, box-shadow .15s, background .15s;
-    }
-    .pin:hover {
-      transform: translate(-50%, -50%) scale(1.2);
-      box-shadow: 0 4px 16px rgba(0,0,0,.3);
-    }
-    .pin.highlight {
-      background: var(--pin-hl);
-      animation: pulse 1.2s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(212,149,106,.5); }
-      50%       { box-shadow: 0 0 0 10px rgba(212,149,106,0); }
-    }
-
-    /* ── Sidebar ── */
-    #sidebar {
-      width: 340px;
-      background: var(--surface);
-      border-left: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-      overflow: hidden;
-    }
-
-    #sidebar-header {
-      padding: 20px 20px 16px;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-    #sidebar-header h2 {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-      letter-spacing: -.1px;
-    }
-    #sidebar-header p {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 3px;
-      font-weight: 400;
-    }
-
-    #ann-count {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 20px; height: 20px;
-      background: var(--accent-lt);
-      color: var(--accent);
-      font-size: 11px;
-      font-weight: 600;
-      border-radius: 6px;
-      margin-left: 6px;
-    }
-
-    #annotations-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 14px;
-    }
-
-    #no-annotations {
-      text-align: center;
-      padding: 56px 20px;
-    }
-    #no-annotations .no-ann-icon {
-      width: 48px; height: 48px;
-      background: var(--accent-lt);
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      margin: 0 auto 14px;
-    }
-    #no-annotations p {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.7;
-    }
-    #no-annotations strong {
-      display: block;
-      font-size: 14px;
-      color: var(--text);
-      font-weight: 500;
-      margin-bottom: 6px;
-    }
-
-    /* ── Cards ── */
-    .annotation-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 10px;
-      position: relative;
-      transition: box-shadow .2s, border-color .2s, transform .15s;
-      cursor: default;
-    }
-    .annotation-card:hover {
-      box-shadow: 0 4px 16px rgba(0,0,0,.07);
-      border-color: #D4C8BC;
-    }
-    .annotation-card.highlight {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-lt);
-    }
-
-    .card-header {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-    }
-
-    .card-num {
-      width: 22px; height: 22px;
-      background: var(--pin);
-      border-radius: 7px;
-      color: white;
-      font-size: 11px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .card-text {
-      font-size: 13px;
-      line-height: 1.55;
-      color: var(--text);
-      word-break: break-word;
-      flex: 1;
-      font-weight: 400;
-    }
-
-    .card-image-wrap {
-      margin-top: 10px;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      position: relative;
-      background: var(--bg);
-    }
-    .card-image-wrap img {
-      width: 100%;
-      display: block;
-      max-height: 200px;
-      object-fit: contain;
-    }
-    .card-image-label {
-      position: absolute;
-      top: 8px; left: 8px;
-      background: rgba(28,25,23,.6);
-      backdrop-filter: blur(4px);
-      color: white;
-      font-size: 10px;
-      font-weight: 500;
-      padding: 3px 8px;
-      border-radius: 20px;
-    }
-
-    .card-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 10px;
-    }
-    .card-type-badge {
-      font-size: 10px;
-      font-weight: 500;
-      padding: 3px 9px;
-      border-radius: 20px;
-      background: var(--bg);
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-    }
-    .card-type-badge.image-badge {
-      background: var(--accent-lt);
-      color: var(--accent);
-      border-color: #D4B8A0;
-    }
-
-    .delete-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--border);
-      font-size: 15px;
-      line-height: 1;
-      padding: 3px 5px;
-      border-radius: 6px;
-      transition: color .18s, background .18s;
-    }
-    .delete-btn:hover { color: var(--danger); background: #FEF2F2; }
-
-    /* ── SVG arrows ── */
-    #arrows-svg {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 10;
-    }
-
-    /* ── Modal overlay ── */
-    #modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(28,25,23,.45);
-      backdrop-filter: blur(3px);
-      z-index: 300;
-      align-items: center;
-      justify-content: center;
-    }
-    #modal-overlay.active { display: flex; }
-
-    #modal {
-      background: var(--surface);
-      border-radius: 18px;
-      padding: 28px 26px 22px;
-      width: 460px;
-      max-width: 92vw;
-      box-shadow: 0 24px 64px rgba(0,0,0,.18);
-      animation: modal-in .22s cubic-bezier(.16,1,.3,1);
-    }
-    @keyframes modal-in {
-      from { opacity: 0; transform: translateY(12px) scale(.97); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    .modal-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-    .modal-subtitle {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 18px;
-    }
-
-    #annotation-text {
-      width: 100%;
-      min-height: 96px;
-      padding: 12px 14px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      font-size: 13px;
-      line-height: 1.55;
-      resize: vertical;
-      outline: none;
-      transition: border-color .2s, box-shadow .2s;
-      font-family: 'Inter', sans-serif;
-      color: var(--text);
-      background: var(--bg);
-      margin-bottom: 12px;
-    }
-    #annotation-text::placeholder { color: var(--text-muted); }
-    #annotation-text:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-lt);
-      background: white;
-    }
-
-    .upload-area {
-      border: 1.5px dashed var(--border);
-      border-radius: 10px;
-      padding: 20px 16px;
-      text-align: center;
-      cursor: pointer;
-      transition: all .2s;
-      margin-bottom: 18px;
-      background: var(--bg);
-    }
-    .upload-area:hover {
-      border-color: var(--accent);
-      background: var(--accent-lt);
-    }
-    .upload-area.has-file {
-      border-color: #5C9467;
-      background: #F0F7F1;
-    }
-    .upload-icon-wrap {
-      width: 36px; height: 36px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      margin: 0 auto 8px;
-    }
-    .upload-area p {
-      font-size: 12px;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
-    .upload-area p.upload-main {
-      font-size: 13px;
-      color: var(--text);
-      font-weight: 500;
-      margin-bottom: 2px;
-    }
-
-    #image-preview {
-      display: none;
-      max-height: 120px;
-      max-width: 100%;
-      border-radius: 8px;
-      margin-top: 10px;
-      object-fit: contain;
-      border: 1px solid var(--border);
-    }
-
-    #modal-buttons {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-    }
-    .btn {
-      padding: 9px 20px;
-      border: none;
-      border-radius: 9px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      transition: all .18s;
-      font-family: 'Inter', sans-serif;
-    }
-    .btn:active { transform: scale(.98); }
-    .btn-primary {
-      background: var(--accent);
-      color: white;
-    }
-    .btn-primary:hover { background: var(--accent-hover); }
-    .btn-secondary {
-      background: var(--bg);
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-    }
-    .btn-secondary:hover { color: var(--text); border-color: #C8BFB5; }
-
-    /* ── Scrollbar ── */
-    #annotations-list::-webkit-scrollbar { width: 4px; }
-    #annotations-list::-webkit-scrollbar-track { background: transparent; }
-    #annotations-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-    #floor-plan-area::-webkit-scrollbar { width: 6px; height: 6px; }
-    #floor-plan-area::-webkit-scrollbar-track { background: transparent; }
-    #floor-plan-area::-webkit-scrollbar-thumb { background: #C8BFB5; border-radius: 4px; }
+      --bg: #F4F1ED; --surface: #FFFFFF; --border: #E5E0D8;
+      --text: #1C1917; --text-muted: #8C8070;
+      --accent: #A0734A; --accent-lt: #F5EDE4; --accent-hover: #8A5C38;
+      --pin: #A0734A; --pin-hl: #D4956A; --danger: #C0392B; --topbar-h: 56px;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); overflow: hidden; height: 100vh; color: var(--text); }
+    #topbar { position: fixed; top:0; left:0; right:0; height: var(--topbar-h); background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 14px; z-index: 200; }
+    #topbar-logo { display: flex; align-items: center; gap: 10px; flex: 1; }
+    .logo-mark { width:30px; height:30px; background:var(--accent); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-size:13px; font-weight:600; flex-shrink:0; }
+    #topbar-logo h1 { font-size:14px; font-weight:500; letter-spacing:-.2px; }
+    #topbar-logo span { font-size:11px; color:var(--text-muted); }
+    #zoom-controls { display:flex; align-items:center; gap:3px; background:var(--bg); padding:4px; border-radius:10px; border:1px solid var(--border); }
+    .zoom-btn { width:28px; height:28px; border:none; border-radius:7px; background:transparent; color:var(--text-muted); font-size:16px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; font-family:'Inter',sans-serif; }
+    .zoom-btn:hover { background:var(--surface); color:var(--text); box-shadow:0 1px 4px rgba(0,0,0,.08); }
+    .zoom-btn:active { transform:scale(.93); }
+    #zoom-level { font-size:11px; font-weight:500; color:var(--text-muted); min-width:36px; text-align:center; }
+    .layout-switcher { display:flex; gap:3px; background:var(--bg); padding:4px; border-radius:10px; border:1px solid var(--border); }
+    .layout-btn { padding:5px 14px; border:none; border-radius:7px; background:transparent; color:var(--text-muted); font-size:12px; font-weight:500; cursor:pointer; transition:all .18s; font-family:'Inter',sans-serif; }
+    .layout-btn.active { background:var(--surface); color:var(--text); box-shadow:0 1px 4px rgba(0,0,0,.08); }
+    .layout-btn:not(.active):hover { color:var(--text); }
+    #export-btn { display:flex; align-items:center; gap:6px; padding:7px 14px; background:var(--accent-lt); border:1px solid #D4B8A0; border-radius:8px; color:var(--accent); font-size:12px; font-weight:500; cursor:pointer; transition:all .18s; font-family:'Inter',sans-serif; }
+    #export-btn:hover { background:var(--accent); color:white; border-color:var(--accent); }
+    #sync-dot { width:7px; height:7px; border-radius:50%; background:#ccc; flex-shrink:0; transition:background .4s; }
+    #sync-dot.ok { background:#5C9467; }
+    #sync-dot.busy { background:#E8A838; animation:blink .7s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+    #app { display:flex; height:100vh; padding-top:var(--topbar-h); }
+    #floor-plan-area { flex:1; overflow:auto; display:flex; align-items:flex-start; justify-content:center; padding:32px; background:var(--bg); }
+    #floor-plan-container { position:relative; display:inline-block; cursor:crosshair; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.06); flex-shrink:0; overflow:hidden; }
+    #floor-plan-img { display:block; width:100%; user-select:none; }
+    .pin { position:absolute; width:28px; height:28px; background:var(--pin); border:2px solid white; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:11px; font-family:'Inter',sans-serif; transform:translate(-50%,-50%); cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.25); z-index:20; transition:transform .15s,box-shadow .15s,background .15s; }
+    .pin:hover { transform:translate(-50%,-50%) scale(1.2); box-shadow:0 4px 16px rgba(0,0,0,.3); }
+    .pin.highlight { background:var(--pin-hl); animation:pulse 1.2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(212,149,106,.5)} 50%{box-shadow:0 0 0 10px rgba(212,149,106,0)} }
+    #sidebar { width:340px; background:var(--surface); border-left:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; }
+    #sidebar-header { padding:18px 20px 14px; border-bottom:1px solid var(--border); flex-shrink:0; }
+    #sidebar-header h2 { font-size:13px; font-weight:600; letter-spacing:-.1px; }
+    #sidebar-header p { font-size:11px; color:var(--text-muted); margin-top:3px; }
+    #ann-count { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; background:var(--accent-lt); color:var(--accent); font-size:11px; font-weight:600; border-radius:6px; margin-left:6px; }
+    #annotations-list { flex:1; overflow-y:auto; padding:12px; }
+    #no-annotations { text-align:center; padding:52px 20px; }
+    .no-ann-icon { width:48px; height:48px; background:var(--accent-lt); border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; margin:0 auto 14px; }
+    #no-annotations strong { display:block; font-size:14px; font-weight:500; margin-bottom:6px; }
+    #no-annotations p { font-size:12px; color:var(--text-muted); line-height:1.7; }
+    .annotation-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:13px; margin-bottom:9px; position:relative; transition:box-shadow .2s,border-color .2s; }
+    .annotation-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.07); border-color:#D4C8BC; }
+    .annotation-card.highlight { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-lt); }
+    .card-header { display:flex; align-items:flex-start; gap:10px; }
+    .card-num { width:22px; height:22px; background:var(--pin); border-radius:7px; color:white; font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+    .card-text { font-size:13px; line-height:1.55; color:var(--text); word-break:break-word; flex:1; }
+    .card-image-wrap { margin-top:10px; border-radius:8px; overflow:hidden; border:1px solid var(--border); position:relative; background:var(--bg); }
+    .card-image-wrap img { width:100%; display:block; max-height:200px; object-fit:contain; }
+    .card-image-label { position:absolute; top:8px; left:8px; background:rgba(28,25,23,.6); backdrop-filter:blur(4px); color:white; font-size:10px; font-weight:500; padding:3px 8px; border-radius:20px; }
+    .card-footer { display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
+    .card-type-badge { font-size:10px; font-weight:500; padding:3px 9px; border-radius:20px; background:var(--bg); color:var(--text-muted); border:1px solid var(--border); }
+    .card-type-badge.image-badge { background:var(--accent-lt); color:var(--accent); border-color:#D4B8A0; }
+    .delete-btn { background:none; border:none; cursor:pointer; color:var(--border); font-size:15px; line-height:1; padding:3px 5px; border-radius:6px; transition:color .18s,background .18s; }
+    .delete-btn:hover { color:var(--danger); background:#FEF2F2; }
+    #arrows-svg { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:10; }
+    #cursor-hint { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:rgba(28,25,23,.75); backdrop-filter:blur(8px); color:white; font-size:12px; padding:8px 18px; border-radius:20px; pointer-events:none; transition:opacity .4s; z-index:50; }
+    #cursor-hint.hidden { opacity:0; }
+    #modal-overlay { display:none; position:fixed; inset:0; background:rgba(28,25,23,.45); backdrop-filter:blur(3px); z-index:300; align-items:center; justify-content:center; }
+    #modal-overlay.active { display:flex; }
+    #modal { background:var(--surface); border-radius:18px; padding:28px 26px 22px; width:460px; max-width:92vw; box-shadow:0 24px 64px rgba(0,0,0,.18); animation:modal-in .22s cubic-bezier(.16,1,.3,1); }
+    @keyframes modal-in { from{opacity:0;transform:translateY(12px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+    .modal-title { font-size:15px; font-weight:600; margin-bottom:4px; }
+    .modal-subtitle { font-size:12px; color:var(--text-muted); margin-bottom:18px; }
+    #annotation-text { width:100%; min-height:96px; padding:12px 14px; border:1px solid var(--border); border-radius:10px; font-size:13px; line-height:1.55; resize:vertical; outline:none; transition:border-color .2s,box-shadow .2s; font-family:'Inter',sans-serif; color:var(--text); background:var(--bg); margin-bottom:12px; }
+    #annotation-text::placeholder { color:var(--text-muted); }
+    #annotation-text:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-lt); background:white; }
+    .upload-area { border:1.5px dashed var(--border); border-radius:10px; padding:18px 16px; text-align:center; cursor:pointer; transition:all .2s; margin-bottom:18px; background:var(--bg); }
+    .upload-area:hover { border-color:var(--accent); background:var(--accent-lt); }
+    .upload-area.has-file { border-color:#5C9467; background:#F0F7F1; }
+    .upload-icon-wrap { width:36px; height:36px; background:var(--surface); border:1px solid var(--border); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; margin:0 auto 8px; }
+    .upload-area .upload-main { font-size:13px; color:var(--text); font-weight:500; margin-bottom:2px; }
+    .upload-area .upload-sub { font-size:11px; color:var(--text-muted); }
+    #image-preview { display:none; max-height:120px; max-width:100%; border-radius:8px; margin-top:10px; object-fit:contain; border:1px solid var(--border); }
+    #modal-buttons { display:flex; gap:8px; justify-content:flex-end; }
+    .btn { padding:9px 20px; border:none; border-radius:9px; cursor:pointer; font-size:13px; font-weight:500; transition:all .18s; font-family:'Inter',sans-serif; }
+    .btn:active { transform:scale(.98); }
+    .btn-primary { background:var(--accent); color:white; }
+    .btn-primary:hover { background:var(--accent-hover); }
+    .btn-secondary { background:var(--bg); color:var(--text-muted); border:1px solid var(--border); }
+    .btn-secondary:hover { color:var(--text); border-color:#C8BFB5; }
+    .btn-primary.loading { opacity:.7; pointer-events:none; }
+    #annotations-list::-webkit-scrollbar { width:4px; }
+    #annotations-list::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+    #floor-plan-area::-webkit-scrollbar { width:6px; height:6px; }
+    #floor-plan-area::-webkit-scrollbar-thumb { background:#C8BFB5; border-radius:4px; }
   </style>
 </head>
 <body>
-
-<!-- SVG arrows -->
 <svg id="arrows-svg" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <marker id="arrowhead" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
-      <polygon points="0 0, 7 2.5, 0 5" fill="#A0734A" opacity=".7"/>
-    </marker>
-    <marker id="arrowhead-hl" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
-      <polygon points="0 0, 7 2.5, 0 5" fill="#D4956A"/>
-    </marker>
+    <marker id="arrowhead" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="#A0734A" opacity=".7"/></marker>
+    <marker id="arrowhead-hl" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="#D4956A"/></marker>
   </defs>
 </svg>
-
-<!-- Top bar -->
 <div id="topbar">
   <div id="topbar-logo">
     <div class="logo-mark">AF</div>
-    <div>
-      <h1>Apto Florida</h1>
-      <span>Revisão de Layout</span>
-    </div>
+    <div><h1>Apto Florida</h1><span>Revisão de Layout</span></div>
   </div>
-
   <div id="zoom-controls">
-    <button class="zoom-btn" onclick="zoom(-1)" title="Reduzir (−)">−</button>
+    <button class="zoom-btn" id="btn-zoom-out" title="Reduzir">−</button>
     <span id="zoom-level">70%</span>
-    <button class="zoom-btn" onclick="zoom(+1)" title="Ampliar (+)">+</button>
-    <button class="zoom-btn" onclick="zoomFit()" title="Ajustar à tela" style="font-size:12px;">⊡</button>
+    <button class="zoom-btn" id="btn-zoom-in" title="Ampliar">+</button>
+    <button class="zoom-btn" id="btn-zoom-fit" title="Ajustar à tela" style="font-size:12px">⊡</button>
   </div>
-
   <div class="layout-switcher">
-    <button class="layout-btn active" onclick="switchLayout(1, this)">Layout 1</button>
-    <button class="layout-btn" onclick="switchLayout(2, this)">Layout 2</button>
-    <button class="layout-btn" onclick="switchLayout(3, this)">Layout 3</button>
+    <button class="layout-btn active" data-layout="1">Layout 1</button>
+    <button class="layout-btn" data-layout="2">Layout 2</button>
+    <button class="layout-btn" data-layout="3">Layout 3</button>
   </div>
-
-  <button id="export-btn" onclick="exportAnnotations()">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-    </svg>
+  <button id="export-btn">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
     Exportar
   </button>
+  <div id="sync-dot" title="Status da conexão"></div>
 </div>
-
-<!-- App -->
 <div id="app">
   <div id="floor-plan-area">
     <div id="floor-plan-container">
       <img id="floor-plan-img" src="layout1.png" alt="Layout" draggable="false">
     </div>
   </div>
-
   <div id="sidebar">
     <div id="sidebar-header">
       <h2>Anotações <span id="ann-count" style="display:none">0</span></h2>
@@ -649,362 +144,257 @@
       <div id="no-annotations">
         <div class="no-ann-icon">📍</div>
         <strong>Nenhuma anotação</strong>
-        <p>Clique em qualquer ponto do layout para registrar uma modificação ou comentário.</p>
+        <p>Clique em qualquer ponto do layout<br>para registrar uma modificação.</p>
       </div>
     </div>
   </div>
 </div>
-
-<!-- Cursor hint -->
 <div id="cursor-hint">Clique no layout para anotar</div>
-
-<!-- Modal -->
 <div id="modal-overlay">
   <div id="modal">
     <p class="modal-title">Nova anotação</p>
     <p class="modal-subtitle">Descreva a modificação desejada neste ponto</p>
-
     <textarea id="annotation-text" placeholder="Ex: Remover parede, trocar revestimento, reposicionar móvel..."></textarea>
-
     <div class="upload-area" id="upload-area">
       <div class="upload-icon-wrap">🖼</div>
       <p class="upload-main">Adicionar imagem de referência</p>
-      <p>Clique ou arraste um arquivo (opcional)</p>
+      <p class="upload-sub">Clique ou arraste um arquivo (opcional)</p>
       <img id="image-preview" alt="Preview">
       <input type="file" id="image-input" accept="image/*" style="display:none">
     </div>
-
     <div id="modal-buttons">
       <button class="btn btn-secondary" id="cancel-btn">Cancelar</button>
       <button class="btn btn-primary" id="save-btn">Salvar anotação</button>
     </div>
   </div>
 </div>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
+import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 
-<script>
-  const state = {
-    annotations: [],
-    counter: 0,
-    pending: null,
-    selectedFile: null,
-    selectedDataUrl: null
+const firebaseConfig = {
+  apiKey: "AIzaSyCxV1SxjPV07AKwyij0JudNSP6fwr5Tu7E",
+  authDomain: "ape-florida.firebaseapp.com",
+  projectId: "ape-florida",
+  storageBucket: "ape-florida.firebasestorage.app",
+  messagingSenderId: "146944418336",
+  appId: "1:146944418336:web:f677e17a52d3710f891245"
+};
+const fbApp  = initializeApp(firebaseConfig);
+const db     = getFirestore(fbApp);
+const annRef = collection(db, 'annotations');
+
+const fpContainer = document.getElementById('floor-plan-container');
+const fpImg       = document.getElementById('floor-plan-img');
+const list        = document.getElementById('annotations-list');
+const noAnn       = document.getElementById('no-annotations');
+const overlay     = document.getElementById('modal-overlay');
+const textarea    = document.getElementById('annotation-text');
+const uploadArea  = document.getElementById('upload-area');
+const fileInput   = document.getElementById('image-input');
+const preview     = document.getElementById('image-preview');
+const arrowsSvg   = document.getElementById('arrows-svg');
+const annCount    = document.getElementById('ann-count');
+const cursorHint  = document.getElementById('cursor-hint');
+const syncDot     = document.getElementById('sync-dot');
+const saveBtn     = document.getElementById('save-btn');
+
+let allDocs = [], currentLayout = 1, pending = null, selectedDataUrl = null, hintDismissed = false;
+
+syncDot.className = 'busy';
+onSnapshot(query(annRef, orderBy('createdAt')), (snapshot) => {
+  syncDot.className = 'ok';
+  allDocs = snapshot.docs.map(d => ({ docId: d.id, ...d.data() }));
+  rerenderLayout();
+}, () => { syncDot.className = ''; });
+
+function rerenderLayout() {
+  fpContainer.querySelectorAll('.pin').forEach(p => p.remove());
+  list.querySelectorAll('.annotation-card').forEach(c => c.remove());
+  arrowsSvg.querySelectorAll('.ann-arrow').forEach(a => a.remove());
+  const filtered = allDocs.filter(a => (a.layoutNum || 1) === currentLayout);
+  if (!filtered.length) { noAnn.style.display = ''; annCount.style.display = 'none'; return; }
+  noAnn.style.display = 'none';
+  annCount.textContent = filtered.length;
+  annCount.style.display = 'inline-flex';
+  filtered.forEach((ann, idx) => { renderPin(ann, idx + 1); renderCard(ann, idx + 1); });
+  setTimeout(drawArrows, 60);
+}
+
+function renderPin(ann, num) {
+  const pin = document.createElement('div');
+  pin.className = 'pin'; pin.dataset.docId = ann.docId;
+  pin.textContent = num; pin.style.left = ann.xPct + '%'; pin.style.top = ann.yPct + '%';
+  pin.addEventListener('mouseenter', () => highlight(ann.docId, true));
+  pin.addEventListener('mouseleave', () => highlight(ann.docId, false));
+  pin.addEventListener('click', (e) => { e.stopPropagation(); scrollToCard(ann.docId); });
+  fpContainer.appendChild(pin);
+}
+
+function renderCard(ann, num) {
+  const card = document.createElement('div');
+  card.className = 'annotation-card'; card.dataset.docId = ann.docId; card.id = 'card-' + ann.docId;
+  const hasImg = !!ann.imageData;
+  card.innerHTML = '<div class="card-header"><div class="card-num">' + num + '</div><div class="card-text">' + (ann.text ? escapeHtml(ann.text) : '<em style="color:var(--text-muted);font-style:normal">Sem descrição</em>') + '</div></div>' +
+    (hasImg ? '<div class="card-image-wrap"><img src="' + ann.imageData + '" alt="Ref ' + num + '"><span class="card-image-label">Referência</span></div>' : '') +
+    '<div class="card-footer"><span class="card-type-badge ' + (hasImg ? 'image-badge' : '') + '">' + (hasImg ? 'Texto + Imagem' : 'Comentário') + '</span><button class="delete-btn" title="Remover">✕</button></div>';
+  card.querySelector('.delete-btn').addEventListener('click', () => removeAnnotation(ann.docId));
+  card.addEventListener('mouseenter', () => highlight(ann.docId, true));
+  card.addEventListener('mouseleave', () => highlight(ann.docId, false));
+  list.appendChild(card);
+}
+
+async function removeAnnotation(docId) {
+  syncDot.className = 'busy';
+  await deleteDoc(doc(db, 'annotations', docId));
+}
+
+function highlight(docId, on) {
+  fpContainer.querySelector('.pin[data-doc-id="' + docId + '"]')?.classList.toggle('highlight', on);
+  document.getElementById('card-' + docId)?.classList.toggle('highlight', on);
+  const arrow = document.getElementById('arrow-' + docId);
+  if (arrow) { arrow.setAttribute('stroke', on ? '#D4956A' : '#A0734A'); arrow.setAttribute('marker-end', on ? 'url(#arrowhead-hl)' : 'url(#arrowhead)'); arrow.setAttribute('stroke-width', on ? '2.5' : '1.5'); arrow.setAttribute('opacity', on ? '1' : '0.6'); }
+}
+
+function scrollToCard(docId) { document.getElementById('card-' + docId)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+
+function drawArrows() {
+  arrowsSvg.querySelectorAll('.ann-arrow').forEach(el => el.remove());
+  fpContainer.querySelectorAll('.pin').forEach(pin => {
+    const docId = pin.dataset.docId;
+    const card = document.getElementById('card-' + docId);
+    if (!card) return;
+    const pr = pin.getBoundingClientRect(), cr = card.getBoundingClientRect();
+    const x1 = pr.left + pr.width/2, y1 = pr.top + pr.height/2;
+    const x2 = cr.left - 2, y2 = cr.top + cr.height/2;
+    const mx = x1 + (x2 - x1) * 0.5;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('id', 'arrow-' + docId); path.setAttribute('class', 'ann-arrow');
+    path.setAttribute('d', 'M' + x1 + ',' + y1 + ' C' + mx + ',' + y1 + ' ' + mx + ',' + y2 + ' ' + x2 + ',' + y2);
+    path.setAttribute('stroke', '#A0734A'); path.setAttribute('stroke-width', '1.5');
+    path.setAttribute('stroke-dasharray', '5 4'); path.setAttribute('fill', 'none');
+    path.setAttribute('marker-end', 'url(#arrowhead)'); path.setAttribute('opacity', '0.6');
+    arrowsSvg.appendChild(path);
+  });
+}
+
+document.getElementById('floor-plan-area').addEventListener('scroll', drawArrows);
+document.getElementById('annotations-list').addEventListener('scroll', drawArrows);
+window.addEventListener('resize', drawArrows);
+
+fpContainer.addEventListener('click', (e) => {
+  if (e.target.classList.contains('pin')) return;
+  const rect = fpImg.getBoundingClientRect();
+  pending = { xPct: (e.clientX - rect.left) / rect.width * 100, yPct: (e.clientY - rect.top) / rect.height * 100 };
+  hintDismissed = true; cursorHint.classList.add('hidden'); openModal();
+});
+fpContainer.addEventListener('mouseenter', () => { if (!hintDismissed) cursorHint.classList.add('hidden'); });
+fpContainer.addEventListener('mouseleave', () => { if (!hintDismissed) cursorHint.classList.remove('hidden'); });
+
+function openModal() {
+  textarea.value = ''; selectedDataUrl = null; preview.style.display = 'none';
+  uploadArea.classList.remove('has-file');
+  uploadArea.querySelector('.upload-main').textContent = 'Adicionar imagem de referência';
+  uploadArea.querySelector('.upload-sub').textContent = 'Clique ou arraste um arquivo (opcional)';
+  saveBtn.classList.remove('loading'); saveBtn.textContent = 'Salvar anotação';
+  overlay.classList.add('active'); setTimeout(() => textarea.focus(), 60);
+}
+function closeModal() { overlay.classList.remove('active'); pending = null; }
+
+document.getElementById('cancel-btn').addEventListener('click', closeModal);
+overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+uploadArea.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', () => {
+  const file = fileInput.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    selectedDataUrl = ev.target.result; preview.src = ev.target.result; preview.style.display = 'block';
+    uploadArea.classList.add('has-file');
+    uploadArea.querySelector('.upload-main').textContent = '✓ ' + file.name;
+    uploadArea.querySelector('.upload-sub').textContent = 'Imagem pronta';
   };
+  reader.readAsDataURL(file);
+});
+uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.style.borderColor = 'var(--accent)'; });
+uploadArea.addEventListener('dragleave', () => { uploadArea.style.borderColor = ''; });
+uploadArea.addEventListener('drop', (e) => {
+  e.preventDefault(); uploadArea.style.borderColor = '';
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) { const dt = new DataTransfer(); dt.items.add(file); fileInput.files = dt.files; fileInput.dispatchEvent(new Event('change')); }
+});
 
-  const fpContainer = document.getElementById('floor-plan-container');
-  const fpImg       = document.getElementById('floor-plan-img');
-  const list        = document.getElementById('annotations-list');
-  const noAnn       = document.getElementById('no-annotations');
-  const overlay     = document.getElementById('modal-overlay');
-  const textarea    = document.getElementById('annotation-text');
-  const uploadArea  = document.getElementById('upload-area');
-  const fileInput   = document.getElementById('image-input');
-  const preview     = document.getElementById('image-preview');
-  const arrowsSvg   = document.getElementById('arrows-svg');
-  const annCount    = document.getElementById('ann-count');
-  const cursorHint  = document.getElementById('cursor-hint');
-
-  // Hide hint after first interaction
-  let hintDismissed = false;
-  fpContainer.addEventListener('mouseenter', () => {
-    if (!hintDismissed) cursorHint.classList.add('hidden');
-  });
-  fpContainer.addEventListener('mouseleave', () => {
-    if (!hintDismissed) cursorHint.classList.remove('hidden');
-  });
-
-  /* ── Click on floor plan ── */
-  fpContainer.addEventListener('click', (e) => {
-    if (e.target.classList.contains('pin')) return;
-    const rect = fpImg.getBoundingClientRect();
-    const xPct = (e.clientX - rect.left) / rect.width  * 100;
-    const yPct = (e.clientY - rect.top)  / rect.height * 100;
-    state.pending = { xPct, yPct };
-    hintDismissed = true;
-    cursorHint.classList.add('hidden');
-    openModal();
-  });
-
-  /* ── Modal ── */
-  function openModal() {
-    textarea.value = '';
-    state.selectedFile = null;
-    state.selectedDataUrl = null;
-    preview.style.display = 'none';
-    uploadArea.classList.remove('has-file');
-    uploadArea.querySelector('.upload-main').textContent = 'Adicionar imagem de referência';
-    uploadArea.querySelector('p:last-of-type').textContent = 'Clique ou arraste um arquivo (opcional)';
-    overlay.classList.add('active');
-    setTimeout(() => textarea.focus(), 60);
+saveBtn.addEventListener('click', async () => {
+  const text = textarea.value.trim();
+  if (!text && !selectedDataUrl) {
+    textarea.focus(); textarea.style.borderColor = '#C0392B'; textarea.style.boxShadow = '0 0 0 3px rgba(192,57,43,.15)';
+    setTimeout(() => { textarea.style.borderColor = ''; textarea.style.boxShadow = ''; }, 1400); return;
   }
+  if (!pending) return;
+  saveBtn.classList.add('loading'); saveBtn.textContent = 'Salvando...'; syncDot.className = 'busy';
+  let imageData = null;
+  if (selectedDataUrl) imageData = await compressImage(selectedDataUrl);
+  await addDoc(annRef, { xPct: pending.xPct, yPct: pending.yPct, text, imageData, layoutNum: currentLayout, createdAt: serverTimestamp() });
+  closeModal();
+});
 
-  function closeModal() {
-    overlay.classList.remove('active');
-    state.pending = null;
-  }
-
-  document.getElementById('cancel-btn').addEventListener('click', closeModal);
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
-
-  /* Upload */
-  uploadArea.addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', () => {
-    const file = fileInput.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      state.selectedDataUrl = ev.target.result;
-      state.selectedFile = file;
-      preview.src = ev.target.result;
-      preview.style.display = 'block';
-      uploadArea.classList.add('has-file');
-      uploadArea.querySelector('.upload-main').textContent = '✓ ' + file.name;
-      uploadArea.querySelector('p:last-of-type').textContent = 'Imagem pronta';
+function compressImage(dataUrl, maxWidth = 800, quality = 0.72) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
     };
-    reader.readAsDataURL(file);
+    img.src = dataUrl;
   });
+}
 
-  uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.style.borderColor = 'var(--accent)'; });
-  uploadArea.addEventListener('dragleave', () => { uploadArea.style.borderColor = ''; });
-  uploadArea.addEventListener('drop', (e) => {
-    e.preventDefault();
-    uploadArea.style.borderColor = '';
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
-      const dt = new DataTransfer();
-      dt.items.add(file);
-      fileInput.files = dt.files;
-      fileInput.dispatchEvent(new Event('change'));
-    }
-  });
-
-  /* Save */
-  document.getElementById('save-btn').addEventListener('click', () => {
-    const text = textarea.value.trim();
-    if (!text && !state.selectedDataUrl) {
-      textarea.focus();
-      textarea.style.borderColor = '#C0392B';
-      textarea.style.boxShadow = '0 0 0 3px rgba(192,57,43,.15)';
-      setTimeout(() => { textarea.style.borderColor = ''; textarea.style.boxShadow = ''; }, 1400);
-      return;
-    }
-    if (!state.pending) return;
-
-    state.counter++;
-    const ann = {
-      id: state.counter,
-      xPct: state.pending.xPct,
-      yPct: state.pending.yPct,
-      text,
-      imageUrl: state.selectedDataUrl || null
-    };
-    state.annotations.push(ann);
-    renderPin(ann);
-    renderCard(ann);
-    updateCount();
-    closeModal();
-    setTimeout(drawArrows, 50);
-    list.scrollTop = list.scrollHeight;
-  });
-
-  /* ── Pin ── */
-  function renderPin(ann) {
-    const pin = document.createElement('div');
-    pin.className = 'pin';
-    pin.dataset.id = ann.id;
-    pin.textContent = ann.id;
-    pin.style.left = ann.xPct + '%';
-    pin.style.top  = ann.yPct + '%';
-    pin.addEventListener('mouseenter', () => highlightAnnotation(ann.id, true));
-    pin.addEventListener('mouseleave', () => highlightAnnotation(ann.id, false));
-    pin.addEventListener('click', (e) => { e.stopPropagation(); scrollToCard(ann.id); });
-    fpContainer.appendChild(pin);
-  }
-
-  /* ── Card ── */
-  function renderCard(ann) {
-    noAnn.style.display = 'none';
-    const card = document.createElement('div');
-    card.className = 'annotation-card';
-    card.dataset.id = ann.id;
-    card.id = `card-${ann.id}`;
-    const hasImage = !!ann.imageUrl;
-
-    card.innerHTML = `
-      <div class="card-header">
-        <div class="card-num">${ann.id}</div>
-        <div class="card-text">${ann.text ? escapeHtml(ann.text) : '<em style="color:var(--text-muted);font-style:normal">Sem descrição</em>'}</div>
-      </div>
-      ${hasImage ? `
-      <div class="card-image-wrap">
-        <img src="${ann.imageUrl}" alt="Ref ${ann.id}">
-        <span class="card-image-label">Referência</span>
-      </div>` : ''}
-      <div class="card-footer">
-        <span class="card-type-badge ${hasImage ? 'image-badge' : ''}">${hasImage ? 'Texto + Imagem' : 'Comentário'}</span>
-        <button class="delete-btn" title="Remover" data-id="${ann.id}">✕</button>
-      </div>
-    `;
-
-    card.querySelector('.delete-btn').addEventListener('click', () => removeAnnotation(ann.id));
-    card.addEventListener('mouseenter', () => highlightAnnotation(ann.id, true));
-    card.addEventListener('mouseleave', () => highlightAnnotation(ann.id, false));
-    list.appendChild(card);
-  }
-
-  /* ── Remove ── */
-  function removeAnnotation(id) {
-    state.annotations = state.annotations.filter(a => a.id !== id);
-    fpContainer.querySelector(`.pin[data-id="${id}"]`)?.remove();
-    document.getElementById(`card-${id}`)?.remove();
-    if (state.annotations.length === 0) noAnn.style.display = '';
-    updateCount();
-    drawArrows();
-  }
-
-  /* ── Highlight ── */
-  function highlightAnnotation(id, on) {
-    fpContainer.querySelector(`.pin[data-id="${id}"]`)?.classList.toggle('highlight', on);
-    document.getElementById(`card-${id}`)?.classList.toggle('highlight', on);
-    const arrow = document.getElementById(`arrow-${id}`);
-    if (arrow) {
-      arrow.setAttribute('stroke', on ? '#D4956A' : '#A0734A');
-      arrow.setAttribute('marker-end', on ? 'url(#arrowhead-hl)' : 'url(#arrowhead)');
-      arrow.setAttribute('stroke-width', on ? '2.5' : '1.5');
-      arrow.setAttribute('opacity', on ? '1' : '0.6');
-    }
-  }
-
-  function scrollToCard(id) {
-    document.getElementById(`card-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-
-  /* ── Arrows ── */
-  function drawArrows() {
-    arrowsSvg.querySelectorAll('.ann-arrow').forEach(el => el.remove());
-    state.annotations.forEach(ann => {
-      const pin  = fpContainer.querySelector(`.pin[data-id="${ann.id}"]`);
-      const card = document.getElementById(`card-${ann.id}`);
-      if (!pin || !card) return;
-
-      const pr = pin.getBoundingClientRect();
-      const cr = card.getBoundingClientRect();
-
-      const x1 = pr.left + pr.width / 2;
-      const y1 = pr.top  + pr.height / 2;
-      const x2 = cr.left - 2;
-      const y2 = cr.top  + cr.height / 2;
-
-      // Bezier curve for elegance
-      const cx1 = x1 + (x2 - x1) * 0.5;
-      const cy1 = y1;
-      const cx2 = x1 + (x2 - x1) * 0.5;
-      const cy2 = y2;
-
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('id', `arrow-${ann.id}`);
-      path.setAttribute('class', 'ann-arrow');
-      path.setAttribute('d', `M${x1},${y1} C${cx1},${cy1} ${cx2},${cy2} ${x2},${y2}`);
-      path.setAttribute('stroke', '#A0734A');
-      path.setAttribute('stroke-width', '1.5');
-      path.setAttribute('stroke-dasharray', '5 4');
-      path.setAttribute('fill', 'none');
-      path.setAttribute('marker-end', 'url(#arrowhead)');
-      path.setAttribute('opacity', '0.6');
-      arrowsSvg.appendChild(path);
-    });
-  }
-
-  document.getElementById('floor-plan-area').addEventListener('scroll', drawArrows);
-  document.getElementById('annotations-list').addEventListener('scroll', drawArrows);
-  window.addEventListener('resize', drawArrows);
-  fpImg.addEventListener('load', drawArrows);
-
-  /* ── Layout switch ── */
-  function switchLayout(num, btn) {
+document.querySelectorAll('.layout-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
     document.querySelectorAll('.layout-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    fpImg.src = `layout${num}.png`;
-  }
-
-  /* ── Count badge ── */
-  function updateCount() {
-    const n = state.annotations.length;
-    annCount.textContent = n;
-    annCount.style.display = n > 0 ? 'inline-flex' : 'none';
-  }
-
-  /* ── Export ── */
-  function exportAnnotations() {
-    if (state.annotations.length === 0) {
-      alert('Nenhuma anotação para exportar.');
-      return;
-    }
-    const data = state.annotations.map(a => ({
-      id: a.id,
-      posicao: { x: a.xPct.toFixed(2) + '%', y: a.yPct.toFixed(2) + '%' },
-      texto: a.text,
-      temImagem: !!a.imageUrl
-    }));
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url; a.download = 'anotacoes_florida.json'; a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  /* ── Zoom ── */
-  const ZOOM_STEPS = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.25, 1.5];
-  let zoomIdx = 4; // default 0.7
-
-  function applyZoom() {
-    const scale = ZOOM_STEPS[zoomIdx];
-    // Set image width so container resizes naturally (pins stay % based)
-    fpImg.style.width = (scale * fpImg.naturalWidth) + 'px';
-    document.getElementById('zoom-level').textContent = Math.round(scale * 100) + '%';
-    setTimeout(drawArrows, 80);
-  }
-
-  function zoom(dir) {
-    zoomIdx = Math.max(0, Math.min(ZOOM_STEPS.length - 1, zoomIdx + dir));
-    applyZoom();
-  }
-
-  function zoomFit() {
-    const area = document.getElementById('floor-plan-area');
-    const availW = area.clientWidth  - 64;
-    const availH = area.clientHeight - 64;
-    const scaleW = availW / fpImg.naturalWidth;
-    const scaleH = availH / fpImg.naturalHeight;
-    const fit    = Math.min(scaleW, scaleH);
-    // Find closest step
-    zoomIdx = ZOOM_STEPS.reduce((best, s, i) =>
-      Math.abs(s - fit) < Math.abs(ZOOM_STEPS[best] - fit) ? i : best, 0);
-    applyZoom();
-  }
-
-  // Auto-fit on load
-  fpImg.addEventListener('load', () => {
-    zoomFit();
-    drawArrows();
+    btn.classList.add('active'); currentLayout = parseInt(btn.dataset.layout);
+    fpImg.src = 'layout' + currentLayout + '.png'; rerenderLayout();
   });
-  // Also try after fonts/layout settle
-  window.addEventListener('load', () => { zoomFit(); drawArrows(); });
+});
 
-  // Keyboard shortcuts
-  document.addEventListener('keydown', (e) => {
-    if (overlay.classList.contains('active')) return;
-    if (e.key === '+' || e.key === '=') zoom(+1);
-    if (e.key === '-' || e.key === '_') zoom(-1);
-    if (e.key === '0') zoomFit();
-  });
+const ZOOM_STEPS = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.25, 1.5];
+let zoomIdx = 4;
+function applyZoom() { fpImg.style.width = (ZOOM_STEPS[zoomIdx] * fpImg.naturalWidth) + 'px'; document.getElementById('zoom-level').textContent = Math.round(ZOOM_STEPS[zoomIdx] * 100) + '%'; setTimeout(drawArrows, 80); }
+function zoomStep(dir) { zoomIdx = Math.max(0, Math.min(ZOOM_STEPS.length - 1, zoomIdx + dir)); applyZoom(); }
+function zoomFit() {
+  const area = document.getElementById('floor-plan-area');
+  const fit = Math.min((area.clientWidth - 64) / fpImg.naturalWidth, (area.clientHeight - 64) / fpImg.naturalHeight);
+  zoomIdx = ZOOM_STEPS.reduce((best, s, i) => Math.abs(s - fit) < Math.abs(ZOOM_STEPS[best] - fit) ? i : best, 0);
+  applyZoom();
+}
+document.getElementById('btn-zoom-out').addEventListener('click', () => zoomStep(-1));
+document.getElementById('btn-zoom-in').addEventListener('click', () => zoomStep(+1));
+document.getElementById('btn-zoom-fit').addEventListener('click', zoomFit);
+fpImg.addEventListener('load', () => { zoomFit(); drawArrows(); });
+window.addEventListener('load', () => { zoomFit(); drawArrows(); });
+document.addEventListener('keydown', (e) => {
+  if (overlay.classList.contains('active')) return;
+  if (e.key === '+' || e.key === '=') zoomStep(+1);
+  if (e.key === '-' || e.key === '_') zoomStep(-1);
+  if (e.key === '0') zoomFit();
+});
 
-  /* ── Escape HTML ── */
-  function escapeHtml(str) {
-    return str
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;').replace(/\n/g,'<br>');
-  }
+document.getElementById('export-btn').addEventListener('click', () => {
+  const filtered = allDocs.filter(a => (a.layoutNum || 1) === currentLayout);
+  if (!filtered.length) { alert('Nenhuma anotação para exportar.'); return; }
+  const data = filtered.map((a, i) => ({ id: i+1, posicao: { x: a.xPct.toFixed(2)+'%', y: a.yPct.toFixed(2)+'%' }, texto: a.text, temImagem: !!a.imageData }));
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'anotacoes_layout' + currentLayout + '.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+
+function escapeHtml(str) { return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\n/g,'<br>'); }
 </script>
 </body>
 </html>
