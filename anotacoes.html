@@ -29,8 +29,8 @@
     .layout-btn { padding:5px 14px; border:none; border-radius:7px; background:transparent; color:var(--text-muted); font-size:12px; font-weight:500; cursor:pointer; transition:all .18s; font-family:'Inter',sans-serif; }
     .layout-btn.active { background:var(--surface); color:var(--text); box-shadow:0 1px 4px rgba(0,0,0,.08); }
     .layout-btn:not(.active):hover { color:var(--text); }
-    #export-btn { display:flex; align-items:center; gap:6px; padding:7px 14px; background:var(--accent-lt); border:1px solid #D4B8A0; border-radius:8px; color:var(--accent); font-size:12px; font-weight:500; cursor:pointer; transition:all .18s; font-family:'Inter',sans-serif; }
-    #export-btn:hover { background:var(--accent); color:white; border-color:var(--accent); }
+    #print-btn { display:flex; align-items:center; gap:6px; padding:7px 14px; background:var(--accent-lt); border:1px solid #D4B8A0; border-radius:8px; color:var(--accent); font-size:12px; font-weight:500; cursor:pointer; transition:all .18s; font-family:'Inter',sans-serif; }
+    #print-btn:hover { background:var(--accent); color:white; border-color:var(--accent); }
     #sync-dot { width:7px; height:7px; border-radius:50%; background:#ccc; flex-shrink:0; transition:background .4s; }
     #sync-dot.ok { background:#5C9467; }
     #sync-dot.busy { background:#E8A838; animation:blink .7s infinite; }
@@ -123,9 +123,9 @@
     <button class="layout-btn" data-layout="2">Layout 2</button>
     <button class="layout-btn" data-layout="3">Layout 3</button>
   </div>
-  <button id="export-btn">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    Exportar
+  <button id="print-btn">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    Imprimir PDF
   </button>
   <div id="sync-dot" title="Status da conexão"></div>
 </div>
@@ -384,14 +384,51 @@ document.addEventListener('keydown', (e) => {
   if (e.key === '0') zoomFit();
 });
 
-document.getElementById('export-btn').addEventListener('click', () => {
+document.getElementById('print-btn').addEventListener('click', () => {
   const filtered = allDocs.filter(a => (a.layoutNum || 1) === currentLayout);
-  if (!filtered.length) { alert('Nenhuma anotação para exportar.'); return; }
-  const data = filtered.map((a, i) => ({ id: i+1, posicao: { x: a.xPct.toFixed(2)+'%', y: a.yPct.toFixed(2)+'%' }, texto: a.text, temImagem: !!a.imageData }));
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = 'anotacoes_layout' + currentLayout + '.json'; a.click();
-  URL.revokeObjectURL(url);
+  const imgSrc   = fpImg.src;
+  const date     = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
+
+  const pinsHtml = filtered.map((ann, i) =>
+    '<div style="position:absolute;left:' + ann.xPct + '%;top:' + ann.yPct + '%;transform:translate(-50%,-50%);width:20px;height:20px;background:#A0734A;border:2px solid white;border-radius:50%;color:white;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.35);font-family:Inter,sans-serif;">' + (i+1) + '</div>'
+  ).join('');
+
+  const cardsHtml = filtered.length === 0
+    ? '<p style="color:#8C8070;font-size:13px;">Nenhuma anotação neste layout.</p>'
+    : filtered.map((ann, i) => {
+        const hasImg = !!ann.imageData;
+        return '<div style="break-inside:avoid;display:flex;gap:12px;padding:14px;border:1px solid #E5E0D8;border-radius:10px;background:#fff;">' +
+          '<div style="width:24px;height:24px;background:#A0734A;border-radius:7px;color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-family:Inter,sans-serif;">' + (i+1) + '</div>' +
+          '<div style="flex:1;">' +
+            '<p style="font-size:13px;line-height:1.6;color:#1C1917;margin-bottom:' + (hasImg ? '10px' : '0') + ';">' + (ann.text ? escapeHtml(ann.text) : '<em style="color:#8C8070">Sem descrição</em>') + '</p>' +
+            (hasImg ? '<img src="' + ann.imageData + '" style="max-width:100%;max-height:180px;object-fit:contain;border-radius:6px;border:1px solid #E5E0D8;display:block;">' : '') +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+  const html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">' +
+    '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">' +
+    '<style>' +
+      '@page { size: A4 landscape; margin: 14mm 16mm; }' +
+      'body { font-family: Inter, sans-serif; color: #1C1917; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
+      '.page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding-bottom:10px; border-bottom:1.5px solid #E5E0D8; }' +
+      '.page-header h1 { font-size:15px; font-weight:600; color:#1C1917; }' +
+      '.page-header span { font-size:11px; color:#8C8070; }' +
+      '.plan-wrap { position:relative; display:inline-block; width:100%; }' +
+      '.plan-wrap img { width:100%; display:block; border-radius:8px; }' +
+      '.section-title { font-size:12px; font-weight:600; color:#A0734A; text-transform:uppercase; letter-spacing:.6px; margin:20px 0 12px; }' +
+      '.cards-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }' +
+      '@media print { .no-print { display:none; } }' +
+    '</style></head><body>' +
+    '<div class="page-header"><h1>Apto Florida — Layout ' + currentLayout + '</h1><span>' + date + '</span></div>' +
+    '<div class="plan-wrap"><img src="' + imgSrc + '">' + pinsHtml + '</div>' +
+    (filtered.length ? '<p class="section-title" style="margin-top:18px;">Anotações (' + filtered.length + ')</p><div class="cards-grid">' + cardsHtml + '</div>' : '') +
+    '</body></html>';
+
+  const win = window.open('', '_blank', 'width=1100,height=800');
+  win.document.write(html);
+  win.document.close();
+  win.onload = () => { setTimeout(() => win.print(), 400); };
 });
 
 function escapeHtml(str) { return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\n/g,'<br>'); }
